@@ -12,6 +12,8 @@ class SparePartSummary(BaseModel):
     in_stock: int
     low_stock: int
     out_of_stock: int
+    new: int
+    restored: int
 
 class UserSummary(BaseModel):
     total: int
