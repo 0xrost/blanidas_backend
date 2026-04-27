@@ -40,7 +40,7 @@ def current_user(role: Optional[Role]):
 
     return wrapper
 
-def allowed(role: Role | None = None):
+def allowed(role: list[Role] | Role | None = None):
     async def wrapper(
             access_token: Annotated[str, Depends(oauth2_scheme)],
             jwt_settings: JWTSettingsDep,

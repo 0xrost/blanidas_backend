@@ -21,7 +21,7 @@ auth_services = AuthServices()
 @router.get("/", response_model=PaginationResponse[UserInfo])
 async def get_users_list_endpoint(
         database: DatabaseSession,
-        _: Annotated[None, Depends(allowed(role=Role.manager))],
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))],
         pagination: Pagination = Depends(),
         sorting: Sorting = Depends(),
         filters: str | None = Query(None),
@@ -36,17 +36,17 @@ async def get_users_list_endpoint(
 
 @router.post("/", response_model=UserInfo)
 @domain_errors(errors_map)
-async def create_user_endpoint(model: UserCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> UserInfo:
+async def create_user_endpoint(model: UserCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.admin))]) -> UserInfo:
     return await auth_services.create(data=model.model_dump(exclude_none=True), database=database, preloads=["workplace"])
 
 @router.put("/", response_model=UserInfo)
 @domain_errors(errors_map)
-async def update_user_endpoint(model: UserUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> UserInfo:
+async def update_user_endpoint(model: UserUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.admin))]) -> UserInfo:
     return await auth_services.update(id_=model.id, data=model.model_dump(exclude_none=True), database=database, preloads=["workplace"])
 
 @router.delete("/{id_}", response_model=None)
 @domain_errors(errors_map)
-async def delete_user_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> int:
+async def delete_user_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.admin))]) -> int:
     return await auth_services.delete(id_=id_, database=database)
 
 

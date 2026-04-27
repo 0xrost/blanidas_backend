@@ -21,7 +21,7 @@ services = InstitutionServices()
 @router.get("/", response_model=PaginationResponse[InstitutionInfo])
 async def get_institution_list_endpoint(
         database: DatabaseSession,
-        _: Annotated[None, Depends(allowed())],
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))],
         pagination: Pagination = Depends(),
         sorting: Sorting = Depends(),
         filters: str | None = Query(None),
@@ -35,12 +35,12 @@ async def get_institution_list_endpoint(
 
 @router.post("/", response_model=InstitutionInfo)
 @domain_errors(errors_map)
-async def create_institution_endpoint(model: InstitutionCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> InstitutionInfo:
+async def create_institution_endpoint(model: InstitutionCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> InstitutionInfo:
     return await services.create(data=model.model_dump(exclude_none=True), database=database)
 
 @router.put("/", response_model=InstitutionInfo)
 @domain_errors(errors_map)
-async def update_institution_endpoint(model: InstitutionUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> InstitutionInfo:
+async def update_institution_endpoint(model: InstitutionUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> InstitutionInfo:
     return await services.update(
         id_=model.id,
         data=model.model_dump(exclude_none=True),
@@ -49,6 +49,6 @@ async def update_institution_endpoint(model: InstitutionUpdate, database: Databa
 
 @router.delete("/{id_}", response_model=int)
 @domain_errors(errors_map)
-async def delete_institution_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> int:
+async def delete_institution_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> int:
     return await services.delete(id_=id_, database=database)
 

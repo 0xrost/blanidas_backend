@@ -22,7 +22,7 @@ services = ManufacturerServices()
 @router.get("/", response_model=PaginationResponse[ManufacturerInfo])
 async def get_manufacturer_list_endpoint(
         database: DatabaseSession,
-        _: Annotated[None, Depends(allowed())],
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))],
         pagination: Pagination = Depends(),
         sorting: Sorting = Depends(),
         filters: str | None = Query(None),
@@ -36,14 +36,14 @@ async def get_manufacturer_list_endpoint(
 
 @router.post("/", response_model=ManufacturerInfo)
 @domain_errors(error_map)
-async def create_manufacturer_endpoint(model: ManufacturerCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> ManufacturerInfo:
+async def create_manufacturer_endpoint(model: ManufacturerCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> ManufacturerInfo:
     return await services.create(data=model.model_dump(exclude_none=True), database=database)
 
 @router.put("/", response_model=ManufacturerInfo)
 @domain_errors(error_map)
-async def update_manufacturer_endpoint(model: ManufacturerUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> ManufacturerInfo:
+async def update_manufacturer_endpoint(model: ManufacturerUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> ManufacturerInfo:
     return await services.update(id_=model.id, data=model.model_dump(exclude_none=True), database=database)
 
 @router.delete("/{id_}", response_model=int)
-async def delete_manufacturer_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> int:
+async def delete_manufacturer_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> int:
     return await services.delete(id_=id_, database=database)

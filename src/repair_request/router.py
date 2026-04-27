@@ -29,7 +29,7 @@ services = RepairRequestServices(
 @router.get("/", response_model=PaginationResponse[RepairRequestInfo])
 async def get_repair_request_list_endpoint(
         database: DatabaseSession,
-        _: Annotated[None, Depends(allowed())],
+        _: Annotated[None, Depends(allowed(role=[Role.engineer, Role.manager, Role.admin]))],
         pagination: Pagination = Depends(),
         sorting: Sorting = Depends(),
         filters: str | None = Query(None),
@@ -55,7 +55,7 @@ async def get_repair_request_list_endpoint(
     )
 
 @router.get("/{id_}", response_model=RepairRequestInfo)
-async def get_repair_request_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed())]) -> RepairRequestInfo:
+async def get_repair_request_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.engineer, Role.manager, Role.admin]))]) -> RepairRequestInfo:
     return await services.get(
         id_=id_,
         database=database,
@@ -118,7 +118,7 @@ async def update_repair_request_endpoint(
         database: DatabaseSession,
         mailer: MailerServiceDep,
         background_task: BackgroundTasks,
-        _: Annotated[None, Depends(allowed())]
+        _: Annotated[None, Depends(allowed(role=[Role.engineer, Role.manager, Role.admin]))]
 ) -> RepairRequestInfo:
     return await services.update(
         id_=model.id,
@@ -145,7 +145,7 @@ async def delete_repair_request_endpoint(
         id_: int,
         database: DatabaseSession,
         background_tasks: BackgroundTasks,
-        _: Annotated[None, Depends(allowed(role=Role.manager))]
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]
 ) -> int:
     return await services.delete(id_=id_, database=database, background_tasks=background_tasks)
 

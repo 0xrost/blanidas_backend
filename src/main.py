@@ -29,7 +29,7 @@ async def lifespan(_: FastAPI):
             hire_at=datetime.now(),
             email=settings.superuser_email,
             password=settings.superuser_password,
-            role=auth_schemas.Role.manager,
+            role=auth_schemas.Role.admin,
             receive_low_stock_notification=True,
             receive_repair_request_created_notification=True
         )
@@ -45,8 +45,8 @@ app.exception_handler(RequestValidationError)(validation_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://192.168.0.106:5173"],
+    allow_headers=["Authorization", "Content-Type"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
 )

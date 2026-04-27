@@ -22,7 +22,7 @@ services = SparePartCategoryServices()
 @router.get("/", response_model=PaginationResponse[SparePartCategoryInfo])
 async def get_spare_part_category_list_endpoint(
         database: DatabaseSession,
-        _: Annotated[None, Depends(allowed())],
+        _: Annotated[None, Depends(allowed(role=[Role.engineer, Role.manager, Role.admin]))],
         pagination: Pagination = Depends(),
         sorting: Sorting = Depends(),
         filters: str | None = Query(None),
@@ -36,15 +36,15 @@ async def get_spare_part_category_list_endpoint(
 
 @router.post("/", response_model=SparePartCategoryInfo)
 @domain_errors(errors_map)
-async def create_spare_part_category_endpoint(model: SparePartCategoryCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> SparePartCategoryInfo:
+async def create_spare_part_category_endpoint(model: SparePartCategoryCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> SparePartCategoryInfo:
     return await services.create(data=model.model_dump(exclude_none=True), database=database)
 
 @router.put("/", response_model=SparePartCategoryInfo)
 @domain_errors(errors_map)
-async def update_spare_part_category_endpoint(model: SparePartCategoryUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> SparePartCategoryInfo:
+async def update_spare_part_category_endpoint(model: SparePartCategoryUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> SparePartCategoryInfo:
     return await services.update(id_=model.id, data=model.model_dump(exclude_none=True), database=database)
 
 @router.delete("/{id_}", response_model=int)
 @domain_errors(errors_map)
-async def delete_spare_part_category_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> int:
+async def delete_spare_part_category_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> int:
     return await services.delete(id_=id_, database=database)

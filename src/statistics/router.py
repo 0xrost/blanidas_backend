@@ -39,13 +39,15 @@ def get_filters(
 @router.get("/", response_model=StatisticsResponse)
 async def get_statistics_endpoint(
         database: DatabaseSession,
-        filters: Annotated[StatisticsFilters, Depends(get_filters)]
+        filters: Annotated[StatisticsFilters, Depends(get_filters)],
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]
 ) -> StatisticsResponse:
     return await StatisticsServices.get_dashboard(database=database, data=filters)
 
 @router.get("/export-excel")
 async def export_statistics_excel(
         database: DatabaseSession,
-        filters: Annotated[StatisticsFilters, Depends(get_filters)]
+        filters: Annotated[StatisticsFilters, Depends(get_filters)],
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]
 ) -> StreamingResponse:
     return await StatisticsServices.export_statistics_excel(database=database, filters=filters)

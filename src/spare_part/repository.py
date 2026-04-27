@@ -1,7 +1,9 @@
-from sqlalchemy import update, delete, insert
+
+from sqlalchemy import update, delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.decorators import integrity_errors
+from src.institution.schemas import Institution
 from src.sorting import apply_sorting_wrapper, SortingRelatedField
 from src.exceptions import DomainError, DomainErrorCode
 from src.repository import CRUDRepository
@@ -46,6 +48,17 @@ class SparePartRepository(CRUDRepository[SparePart]):
                 "spare_part_id": row_id,
             }))
 
+        institutions = (await database.execute(select(Institution).where(Institution.is_default))).scalars().all()
+        for institution in institutions:
+            location_db = Location(
+                quantity=0,
+                restored_quantity=0,
+                spare_part_id=row_id,
+                institution_id=institution.id,
+            )
+
+            database.add(location_db)
+
         await database.commit()
         return await self.get(row_id, database, preloads)
 
@@ -71,6 +84,7 @@ class SparePartRepository(CRUDRepository[SparePart]):
             for location in data_model.locations:
                 await database.execute(insert(Location).values({
                     "quantity": location.quantity,
+                    "restored_quantity": location.restored_quantity,
                     "institution_id": location.institution_id,
                     "spare_part_id": id_,
                 }))

@@ -9,10 +9,12 @@ from src.spare_part_category.models import SparePartCategoryInfo
 class LocationInfo(BaseModel):
     id: int
     quantity: int
+    restored_quantity: int
     institution: InstitutionInfo | None
 
 class CreateLocation(BaseModel):
     quantity: int
+    restored_quantity: int
     institution_id: int
 
 class SparePartInfo(BaseModel):

@@ -17,10 +17,12 @@ class Location(BaseDatabaseModel):
     __table_args__ = (
         UniqueConstraint("institution_id", "spare_part_id"),
         CheckConstraint("quantity >= 0", name="ck_location_quantity_positive"),
+        CheckConstraint("restored_quantity <= quantity", name="ck_location_restored_lte_quantity")
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     quantity: Mapped[int] = mapped_column()
+    restored_quantity: Mapped[int] = mapped_column(default=0, server_default="0")
 
     institution_id: Mapped[int | None] = mapped_column(ForeignKey("institution.id", ondelete="CASCADE"), nullable=True)
     institution: Mapped["Institution"] = relationship(back_populates="spare_part_locations", lazy="noload")

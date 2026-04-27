@@ -8,6 +8,7 @@ class Institution(BaseDatabaseModel):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(unique=True)
     address: Mapped[str] = mapped_column()
+    is_default: Mapped[bool] = mapped_column(default=False)
 
     contact_email: Mapped[str] = mapped_column()
     contact_phone: Mapped[str] = mapped_column()

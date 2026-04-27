@@ -13,6 +13,7 @@ from src.repair_request.schemas import RepairRequestStatusRecord
 class Role(str, Enum):
     engineer = "engineer"
     manager = "manager"
+    admin = "admin"
 
 class User(BaseDatabaseModel):
     __tablename__ = "user"

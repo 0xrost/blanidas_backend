@@ -20,7 +20,7 @@ services = EquipmentServices()
 @router.get("/", response_model=PaginationResponse[EquipmentInfo])
 async def get_equipment_list_endpoint(
         database: DatabaseSession,
-        _: Annotated[None, Depends(allowed(role=Role.manager))],
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))],
         pagination: Pagination = Depends(),
         sorting: Sorting = Depends(),
         filters: str | None = Query(None),
@@ -40,7 +40,7 @@ async def get_equipment_list_endpoint(
 
 @router.get("/qr-codes", response_model=list[EquipmentQrData])
 @domain_errors(errors_map)
-async def get_equipment_qr_data_endpoint(database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> list[EquipmentQrData]:
+async def get_equipment_qr_data_endpoint(database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> list[EquipmentQrData]:
     return await services.get_qr_data(database=database)
 
 @router.get("/{id_}", response_model=EquipmentInfo)
@@ -59,7 +59,7 @@ async def get_equipment_endpoint(id_: int, database: DatabaseSession) -> Equipme
 
 @router.post("/", response_model=EquipmentInfo)
 @domain_errors(errors_map)
-async def create_equipment_endpoint(model: EquipmentCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> EquipmentInfo:
+async def create_equipment_endpoint(model: EquipmentCreate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> EquipmentInfo:
     return await services.create(
         data=model.model_dump(exclude_none=True),
         database=database,
@@ -73,7 +73,7 @@ async def create_equipment_endpoint(model: EquipmentCreate, database: DatabaseSe
 
 @router.put("/", response_model=EquipmentInfo)
 @domain_errors(errors_map)
-async def update_equipment_endpoint(model: EquipmentUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> EquipmentInfo:
+async def update_equipment_endpoint(model: EquipmentUpdate, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> EquipmentInfo:
     return await services.update(
         id_=model.id,
         data=model.model_dump(exclude_none=True),
@@ -88,5 +88,5 @@ async def update_equipment_endpoint(model: EquipmentUpdate, database: DatabaseSe
 
 @router.delete("/{id_}", response_model=int)
 @domain_errors(errors_map)
-async def delete_equipment_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=Role.manager))]) -> int:
+async def delete_equipment_endpoint(id_: int, database: DatabaseSession, _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))]) -> int:
     return await services.delete(id_=id_, database=database)

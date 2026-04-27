@@ -82,7 +82,7 @@ class AuthServices(GenericServices[User, UserInfo]):
             data: dict[str, Any],
             database: AsyncSession,
             jwt_settings: JWTSettings,
-            role: Role | None = None,
+            role: list[Role] | Role | None = None,
     ) -> IsAllowedReturnType:
         try:
             payload = jwt.decode(data["access_token"], jwt_settings.secret_key, algorithms=[jwt_settings.algorithm])
@@ -92,11 +92,14 @@ class AuthServices(GenericServices[User, UserInfo]):
         id_ = payload.get("id")
         payload_role = payload.get("role")
 
+        if role and isinstance(role, Role):
+            role = [role]
+
         try:
             user = (await self.repo.get(id_, database=database))
         except DomainError:
             return IsAllowedReturnType(is_allowed=False, user=None)
 
-        if role and payload_role != role:
+        if role and payload_role not in role:
             return IsAllowedReturnType(is_allowed=False, user=None)
         return IsAllowedReturnType(is_allowed=True, user=user)
