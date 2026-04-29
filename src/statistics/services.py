@@ -365,6 +365,7 @@ class StatisticsServices:
             select(
                 SparePart.name,
                 Location.quantity,
+                Location.restored_quantity,
                 Institution.name,
             )
             .join(Location, Location.spare_part_id == SparePart.id)
@@ -375,8 +376,9 @@ class StatisticsServices:
         items = await database.execute(query)
         return [{
             "Запчастина": item[0],
-            "Заклад": item[2],
-            "Кількість": item[1],
+            "Заклад": item[3],
+            "Кількість нових": item[1],
+            "Кількість відновлених": item[2],
         } for item in items.all()]
 
     @staticmethod

@@ -20,7 +20,7 @@ services = FailureTypeServices()
 @router.get("/", response_model=PaginationResponse[FailureTypeInfo])
 async def get_failure_type_list_endpoint(
         database: DatabaseSession,
-        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin]))],
+        _: Annotated[None, Depends(allowed(role=[Role.manager, Role.admin, Role.engineer]))],
         pagination: Pagination = Depends(),
         sorting: Sorting = Depends(),
         filters: str | None = Query(None),
