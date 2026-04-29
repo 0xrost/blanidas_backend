@@ -35,6 +35,7 @@ class AppSettings(BaseSettings):
     smtp: SMTPSettings
     static_files_dir: str
     proxy_url_to_static_files_dir: str
+    client_url: str
 
     superuser_email: str
     superuser_password: str

@@ -35,6 +35,11 @@ class SparePartRepository(CRUDRepository[SparePart]):
             sorting_callback=apply_sorting_wrapper(apply_spare_parts_sorting, sorting_related_fields_map),
         )
 
+    @staticmethod
+    async def get_by_ids(ids: list[int], database: AsyncSession) -> list[SparePart]:
+        result = (await database.execute(select(SparePart).where(SparePart.id.in_(ids)))).scalars().all()
+        return list(result)
+
     @integrity_errors()
     async def create(self, data: dict, database: AsyncSession, preloads: list[str] | None = None) -> SparePart:
         data_model = SparePartCreate.model_validate(data)

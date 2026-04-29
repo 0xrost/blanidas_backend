@@ -9,6 +9,7 @@ from fastapi import UploadFile, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.repository import AuthRepository
+from src.config import get_settings
 from src.exceptions import DomainError, DomainErrorCode
 from src.sorting import Sorting
 from src.auth.schemas import User
@@ -26,6 +27,8 @@ from src.spare_part.services import SparePartServices
 
 ALLOWED_PHOTO_EXTENSIONS = {"jpg", "jpeg", "png", "webp", "bmp", "gif", "tiff", "tif"}
 ALLOWED_PHOTO_MIME = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+
+settings = get_settings()
 
 def form_url_to_file(static_dir: str, filename: str) -> str:
     return os.path.join(static_dir, filename)
@@ -142,6 +145,8 @@ class RepairRequestServices(GenericServices[RepairRequest, RepairRequestInfo]):
                         repair_request_urgency=repair_request.urgency.value,
                         repair_request_photos=[photo.file_path for photo in repair_request.photos],
                         equipment_name=repair_request.equipment.equipment_model.name,
+                        institution_name=repair_request.equipment.institution.name,
+                        repair_request_url=f"{settings.client_url}repair-requests/{repair_request.id}",
                     )
                 )
 

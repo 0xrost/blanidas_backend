@@ -34,7 +34,7 @@ class SparePartServices(GenericServices[SparePart, SparePartInfo]):
         return SparePartInfo.model_validate(spare_part.__dict__, from_attributes=True)
 
     async def check_quantity(self, ids: list[int], database: AsyncSession, background_tasks: BackgroundTasks, mailer: MailerService) -> None:
-        spare_parts = (await self.repo.fetch(database, filters={"id": { "in": str(ids) }}))[0]
+        spare_parts = await SparePartRepository.get_by_ids(ids, database)
         for spare_part in spare_parts:
             if spare_part.total_quantity <= spare_part.min_quantity:
                 receivers = (await self.auth_repo.fetch(database=database, filters={"receive_low_stock_notification": "true"}))[0]
