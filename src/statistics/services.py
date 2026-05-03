@@ -4,9 +4,8 @@ from io import BytesIO
 from typing import Any
 
 import pandas
-from sqlalchemy import select, func, desc, and_
+from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 from starlette.responses import StreamingResponse
 
 from src.equipment.schemas import Equipment, EquipmentStatus
@@ -301,6 +300,7 @@ class StatisticsServices:
 
         status_map = {
             RepairRequestStatus.not_taken.value: "Новий",
+            RepairRequestStatus.waiting_engineer.value: "Очікує інженера",
             RepairRequestStatus.in_progress.value: "У роботі",
             RepairRequestStatus.waiting_spare_parts.value: "Очікує запчастини",
             RepairRequestStatus.finished.value: "Виконано"
@@ -377,7 +377,7 @@ class StatisticsServices:
         return [{
             "Запчастина": item[0],
             "Заклад": item[3],
-            "Кількість нових": item[1],
+            "Кількість нових": item[1] - item[2],
             "Кількість відновлених": item[2],
         } for item in items.all()]
 

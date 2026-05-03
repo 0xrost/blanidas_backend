@@ -26,10 +26,16 @@ spare_part_rules = {
 }
 
 repair_part_rules = {
+    "all": lambda db: db.scalar(select(func.count()).select_from(RepairRequest)),
     "new": lambda db: db.scalar(
         select(func.count())
         .select_from(RepairRequest)
         .where(RepairRequest.last_status == RepairRequestStatus.not_taken.value)
+    ),
+    "waiting_engineer": lambda db: db.scalar(
+        select(func.count())
+        .select_from(RepairRequest)
+        .where(RepairRequest.last_status == RepairRequestStatus.waiting_engineer.value)
     ),
     "in_progress": lambda db: db.scalar(
         select(func.count())

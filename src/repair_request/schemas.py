@@ -9,6 +9,7 @@ from src.failure_type.schemas import FailureType, FailureTypeRepairRequest
 
 
 class RepairRequestStatus(str, Enum):
+    waiting_engineer = "waiting_engineer"
     in_progress = "in_progress"
     not_taken = "not_taken"
     waiting_spare_parts = "waiting_spare_parts"

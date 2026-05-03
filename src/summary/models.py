@@ -3,6 +3,8 @@ from pydantic import BaseModel
 
 class RepairRequestSummary(BaseModel):
     new: int
+    all: int
+    waiting_engineer: int
     in_progress: int
     waiting_spare_parts: int
     finished: int
