@@ -13,6 +13,7 @@ from src.spare_part.models import SparePartInfo
 
 class RepairRequestStatusRecordInfo(BaseModel):
     id: int
+    was_merged: bool
     created_at: datetime
     status: RepairRequestStatus
     assigned_engineer: UserInfo | None
@@ -29,29 +30,36 @@ class FileInfo(BaseModel):
     file_path: str
 
 class UsedSparePartCreate(BaseModel):
-    quantity: int
+    new_quantity: int
+    restored_quantity: int = 0
     note: str
     spare_part_id: int
     institution_id: int
 
 class UsedSparePartInfo(BaseModel):
-    quantity: int
+    new_quantity: int
+    restored_quantity: int = 0
     note: str
     spare_part: SparePartInfo | None
     institution: InstitutionInfo | None
 
-class RepairRequestInfo(BaseModel):
+class RepairRequestEntryInfo(BaseModel):
     id: int
     issue: str
+    photos: list[FileInfo]
+    created_at: datetime
+
+class RepairRequestInfo(BaseModel):
+    id: int
     urgency: Urgency
     manager_note: str | None
     engineer_note: str | None
     created_at: datetime
     completed_at: datetime | None
+    updated_at: datetime | None
     last_status: RepairRequestStatus
+    entries: list[RepairRequestEntryInfo]
 
-
-    photos: list[FileInfo]
     failure_types: list[FailureTypeInfo]
     used_spare_parts: list[UsedSparePartInfo]
     status_history: list[RepairRequestStatusRecordInfo]

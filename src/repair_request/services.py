@@ -1,5 +1,6 @@
 import uuid
 import os
+from itertools import chain
 from math import ceil
 from typing import Any
 
@@ -61,9 +62,14 @@ class RepairRequestServices(GenericServices[RepairRequest, RepairRequestInfo]):
         )
 
         models = [self.return_type.model_validate(x.__dict__, from_attributes=True) for x in result[0]]
-        for model in models:
-            for photo in model.photos:
-                photo.file_path = form_url_to_file(self.proxy_url_to_static_files_dir, photo.file_path)
+        photos = chain.from_iterable(
+            entry.photos
+            for model in models
+            for entry in model.entries
+        )
+
+        for photo in photos:
+            photo.file_path = form_url_to_file(self.proxy_url_to_static_files_dir, photo.file_path)
 
         total_pages = max(1, ceil(result[1] / pagination.limit))
         return PaginationResponse.model_validate({
@@ -125,7 +131,8 @@ class RepairRequestServices(GenericServices[RepairRequest, RepairRequestInfo]):
         )
 
         repair_request = RepairRequestInfo.model_validate(repair_request_obj.__dict__, from_attributes=True)
-        for photo in repair_request.photos:
+        photos = chain.from_iterable(entry.photos for entry in repair_request.entries)
+        for photo in photos:
             photo.file_path = form_url_to_file(self.proxy_url_to_static_files_dir, photo.file_path)
 
         if background_tasks and mailer:
@@ -140,10 +147,11 @@ class RepairRequestServices(GenericServices[RepairRequest, RepairRequestInfo]):
                     to=receiver.email,
                     mailer=mailer,
                     payload=RepairRequestCreatedMessagePayload(
+                        was_merged=repair_request.status_history[0].was_merged,
                         receiver_username=receiver.username,
-                        repair_request_issue=repair_request.issue,
+                        repair_request_issue=repair_request.entries[-1].issue,
                         repair_request_urgency=repair_request.urgency.value,
-                        repair_request_photos=[photo.file_path for photo in repair_request.photos],
+                        repair_request_photos=[photo.file_path for photo in repair_request.entries[-1].photos],
                         equipment_name=repair_request.equipment.equipment_model.name,
                         institution_name=repair_request.equipment.institution.name,
                         repair_request_url=f"{settings.client_url}dashboard/repair-requests/{repair_request.id}",
@@ -181,8 +189,10 @@ class RepairRequestServices(GenericServices[RepairRequest, RepairRequestInfo]):
                 mailer=mailer
             )
 
-        for photo in repair_request.photos:
+        photos = chain.from_iterable(entry.photos for entry in repair_request.entries)
+        for photo in photos:
             photo.file_path = form_url_to_file(self.proxy_url_to_static_files_dir, str(photo.file_path))
+
         return RepairRequestInfo.model_validate(repair_request, from_attributes=True)
 
 
@@ -207,7 +217,8 @@ class RepairRequestServices(GenericServices[RepairRequest, RepairRequestInfo]):
         if result is None:
             raise DomainError(code=DomainErrorCode.not_entity)
 
-        for photo in result.photos:
+        photos = chain.from_iterable(entries.photos for entries in result.entries)
+        for photo in photos:
             photo.file_path = form_url_to_file(self.proxy_url_to_static_files_dir, str(photo.file_path))
 
         return RepairRequestInfo.model_validate(result, from_attributes=True)

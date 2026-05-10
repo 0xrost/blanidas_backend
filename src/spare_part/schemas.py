@@ -14,14 +14,10 @@ class StockStatus(str, Enum):
 
 class Location(BaseDatabaseModel):
     __tablename__ = "location"
-    __table_args__ = (
-        UniqueConstraint("institution_id", "spare_part_id"),
-        CheckConstraint("quantity >= 0", name="ck_location_quantity_positive"),
-        CheckConstraint("restored_quantity <= quantity", name="ck_location_restored_lte_quantity")
-    )
+    __table_args__ = (UniqueConstraint("institution_id", "spare_part_id"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    quantity: Mapped[int] = mapped_column()
+    new_quantity: Mapped[int] = mapped_column()
     restored_quantity: Mapped[int] = mapped_column(default=0, server_default="0")
 
     institution_id: Mapped[int | None] = mapped_column(ForeignKey("institution.id", ondelete="CASCADE"), nullable=True)
@@ -37,7 +33,7 @@ class SparePart(BaseDatabaseModel):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
     total_quantity_expr = (
-        select(func.coalesce(func.sum(Location.quantity), 0))
+        select(func.coalesce(func.sum(Location.new_quantity) + func.sum(Location.restored_quantity), 0))
         .where(Location.spare_part_id == id)
         .correlate_except(Location)
         .scalar_subquery()
@@ -70,7 +66,7 @@ class SparePart(BaseDatabaseModel):
     locations: Mapped[list["Location"]] = relationship(
         back_populates="spare_part",
         lazy="noload",
-        order_by="Location.quantity.desc()",
+        order_by="(Location.new_quantity + Location.restored_quantity).desc()",
     )
 
     compatible_models: Mapped[list["EquipmentModel"]] = relationship(

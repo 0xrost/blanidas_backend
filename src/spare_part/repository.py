@@ -88,7 +88,7 @@ class SparePartRepository(CRUDRepository[SparePart]):
             await database.execute(delete(Location).where(Location.spare_part_id == id_))
             for location in data_model.locations:
                 await database.execute(insert(Location).values({
-                    "quantity": location.quantity,
+                    "new_quantity": location.new_quantity,
                     "restored_quantity": location.restored_quantity,
                     "institution_id": location.institution_id,
                     "spare_part_id": id_,

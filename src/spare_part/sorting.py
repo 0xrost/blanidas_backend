@@ -9,7 +9,7 @@ def apply_spare_parts_sorting(stmt: Select, sorting: Sorting, related_fields: So
     total_quantity_subq = (
         select(
             Location.spare_part_id.label("spare_part_id"),
-            func.coalesce(func.sum(Location.quantity), 0).label("total_quantity")
+            (func.sum(Location.new_quantity) + func.sum(Location.restored_quantity)).label("total_quantity")
         )
         .group_by(Location.spare_part_id)
         .subquery()

@@ -21,7 +21,7 @@ spare_part_rules = {
     "in_stock": lambda db: db.scalar(select(func.count()).select_from(SparePart).where(SparePart.stock_status == StockStatus.in_stock.value)),
     "low_stock": lambda db: db.scalar(select(func.count()).select_from(SparePart).where(SparePart.stock_status == StockStatus.low_stock.value)),
     "out_of_stock": lambda db: db.scalar(select(func.count()).select_from(SparePart).where(SparePart.stock_status == StockStatus.out_of_stock.value)),
-    "new": lambda db: db.scalar(select(func.sum(Location.quantity) - func.sum(Location.restored_quantity)).select_from(Location)),
+    "new": lambda db: db.scalar(select(func.sum(Location.new_quantity)).select_from(Location)),
     "restored": lambda db: db.scalar(select(func.sum(Location.restored_quantity)).select_from(Location)),
 }
 

@@ -15,6 +15,7 @@ class RepairRequestCreatedMessagePayload(BaseModel):
     institution_name: str
     repair_request_issue: str
     repair_request_urgency: str
+    was_merged: bool
 
     repair_request_photos: list[str]
     repair_request_url: str

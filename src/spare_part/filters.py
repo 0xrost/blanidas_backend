@@ -18,7 +18,7 @@ def apply_spare_parts_filters(stmt: Select, filters: Filters, related_fields: Fi
         subquery = (
             select(
                 Location.spare_part_id.label("spare_part_id"),
-                func.sum(Location.quantity).label("total_quantity"),
+                func.sum(Location.new_quantity + Location.restored_quantity).label("total_quantity"),
             )
             .group_by(Location.spare_part_id)
             .subquery()

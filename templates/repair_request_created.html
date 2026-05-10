@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Нова заявка на ремонт</title>
+  <title>{% if was_merged %}Оновлення заявки на ремонт{% else %}Нова заявка на ремонт{% endif %}</title>
 </head>
 <body style="margin:0; padding:0; background-color:#f3f4f6; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
 
@@ -17,8 +17,10 @@
 
           <!-- Header -->
           <tr>
-            <td style="background-color:#0ea5e9; padding:24px 28px;">
-              <p style="margin:0; color:#ffffff; font-size:16px; font-weight:500; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Нова заявка на ремонт</p>
+            <td style="background-color:{% if was_merged %}#f59e0b{% else %}#0ea5e9{% endif %}; padding:24px 28px;">
+              <p style="margin:0; color:#ffffff; font-size:16px; font-weight:500; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                {% if was_merged %}Оновлення заявки на ремонт{% else %}Нова заявка на ремонт{% endif %}
+              </p>
               <p style="margin:2px 0 0 0; color:rgba(255,255,255,0.75); font-size:13px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Система обліку обладнання</p>
             </td>
           </tr>
@@ -32,10 +34,37 @@
                 Шановний <span style="color:#111827; font-weight:500;">{{ receiver_username }}</span>,
               </p>
 
+              <!-- Merged notice banner -->
+              {% if was_merged %}
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">
+                <tr>
+                  <td style="background-color:#fffbeb; border:1px solid #fcd34d; border-radius:8px; padding:12px 16px;">
+                    <table cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="padding-right:10px; vertical-align:top;">
+                          <span style="font-size:16px; line-height:1;">&#9432;</span>
+                        </td>
+                        <td>
+                          <p style="margin:0; font-size:13px; color:#92400e; line-height:1.5; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                            До цієї заявки було додано новий запис — дані об'єднано з існуючою заявкою.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              {% endif %}
+
               <!-- Intro -->
               <p style="margin:0 0 20px 0; font-size:14px; color:#6b7280; line-height:1.6; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                Створено нову заявку на ремонт обладнання <span style="color:#111827; font-weight:500;">{{ equipment_name }}</span>
-                у лікарні <span style="color:#111827; font-weight:500;">{{ institution_name }}</span>.
+                {% if was_merged %}
+                  До заявки на ремонт обладнання <span style="color:#111827; font-weight:500;">{{ equipment_name }}</span>
+                  у лікарні <span style="color:#111827; font-weight:500;">{{ institution_name }}</span> додано новий запис.
+                {% else %}
+                  Створено нову заявку на ремонт обладнання <span style="color:#111827; font-weight:500;">{{ equipment_name }}</span>
+                  у лікарні <span style="color:#111827; font-weight:500;">{{ institution_name }}</span>.
+                {% endif %}
               </p>
 
               <!-- Details block -->
@@ -49,7 +78,7 @@
                 </tr>
                 <!-- Urgency row -->
                 <tr>
-                  <td style="padding:12px 16px; background-color:#f9fafb;">
+                  <td style="padding:12px 16px; background-color:#f9fafb; {% if was_merged %}border-bottom:1px solid #e5e7eb;{% endif %}">
                     <table cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td style="padding-right:8px;">
@@ -66,6 +95,7 @@
                     </table>
                   </td>
                 </tr>
+                <!-- Merged badge row -->
               </table>
 
               <!-- Photos section -->
@@ -84,15 +114,19 @@
 
               <!-- Closing text -->
               <p style="margin:0 0 20px 0; font-size:14px; color:#6b7280; line-height:1.6; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                Будь ласка, вжийте необхідних заходів для обробки цієї заявки.
+                {% if was_merged %}
+                  Будь ласка, перегляньте оновлену заявку та вжийте необхідних заходів.
+                {% else %}
+                  Будь ласка, вжийте необхідних заходів для обробки цієї заявки.
+                {% endif %}
               </p>
 
               <!-- Button -->
               <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="background-color:#0ea5e9; border-radius:8px;">
-                    <a href="{{ repair_request_url }}" style="display:inline-block; padding:10px 20px; background-color:#0ea5e9; color:#ffffff; text-decoration:none; border-radius:8px; font-size:14px; font-weight:500; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                      Переглянути заявку &rarr;
+                  <td style="background-color:{% if was_merged %}#f59e0b{% else %}#0ea5e9{% endif %}; border-radius:8px;">
+                    <a href="{{ repair_request_url }}" style="display:inline-block; padding:10px 20px; background-color:{% if was_merged %}#f59e0b{% else %}#0ea5e9{% endif %}; color:#ffffff; text-decoration:none; border-radius:8px; font-size:14px; font-weight:500; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                      {% if was_merged %}Переглянути оновлення &rarr;{% else %}Переглянути заявку &rarr;{% endif %}
                     </a>
                   </td>
                 </tr>

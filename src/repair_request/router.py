@@ -8,7 +8,7 @@ from src.auth.schemas import Role
 from src.decorators import domain_errors
 from src.repair_request.errors import error_map
 from src.repair_request.schemas import Urgency
-from src.sorting import SortOrder, Sorting
+from src.sorting import Sorting
 from src.mailer.dependencies import MailerServiceDep
 from src.pagination import PaginationResponse, Pagination
 from src.repair_request.models import RepairRequestInfo, RepairRequestCreate, RepairRequestUpdate
@@ -48,7 +48,8 @@ async def get_repair_request_list_endpoint(
             "used_spare_parts",
             "used_spare_parts.institution",
             "used_spare_parts.spare_part",
-            "photos",
+            "entries",
+            "entries.photos",
             "status_history",
             "status_history.assigned_engineer",
         ],
@@ -68,7 +69,8 @@ async def get_repair_request_endpoint(id_: int, database: DatabaseSession, _: An
             "used_spare_parts",
             "used_spare_parts.institution",
             "used_spare_parts.spare_part",
-            "photos",
+            "entries",
+            "entries.photos",
             "status_history",
             "status_history.assigned_engineer",
         ]
@@ -104,7 +106,8 @@ async def create_repair_request_endpoint(
             "equipment.equipment_model",
             "failure_types",
             "used_spare_parts",
-            "photos",
+            "entries",
+            "entries.photos",
             "status_history",
             "status_history.assigned_engineer",
         ]
@@ -131,7 +134,8 @@ async def update_repair_request_endpoint(
             "used_spare_parts",
             "used_spare_parts.institution",
             "used_spare_parts.spare_part",
-            "photos",
+            "entries",
+            "entries.photos",
             "status_history",
             "status_history.assigned_engineer",
             "equipment",

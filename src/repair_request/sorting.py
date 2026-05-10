@@ -1,13 +1,18 @@
-from sqlalchemy import select, func, or_, case, Select
+from sqlalchemy import select, func, or_, case, Select, nulls_last
 from sqlalchemy.orm import aliased
 
 from src.equipment.schemas import Equipment
 from src.equipment_model.schemas import EquipmentModel
 from src.sorting import Sorting, SortingRelatedFieldsMap, SortOrder, apply_sorting
-from src.repair_request.schemas import RepairRequest, RepairRequestStatus, Urgency
+from src.repair_request.schemas import RepairRequest, RepairRequestStatus, Urgency, RepairRequestEntry
 
 
 def apply_repair_request_sorting(stmt: Select, sorting: Sorting, related_fields: SortingRelatedFieldsMap) -> Select:
+    if sorting.sort_by == "date":
+        created_at_ordering = RepairRequest.created_at.desc() if sorting.sort_order == SortOrder.descending else RepairRequest.created_at.asc()
+        updated_at_ordering = nulls_last(RepairRequest.updated_at.desc() if sorting.sort_order == SortOrder.descending else RepairRequest.updated_at.asc())
+        stmt = stmt.order_by(updated_at_ordering, created_at_ordering)
+
     if sorting.sort_by == "equipment_model_name":
         equipment_alias = aliased(Equipment)
         equipment_model_alias = aliased(EquipmentModel)
@@ -26,9 +31,10 @@ def apply_repair_request_sorting(stmt: Select, sorting: Sorting, related_fields:
     if sorting.sort_by == "status":
         status_order = case(
             (RepairRequest.last_status == RepairRequestStatus.not_taken, 1),
-            (RepairRequest.last_status == RepairRequestStatus.in_progress, 2),
-            (RepairRequest.last_status == RepairRequestStatus.waiting_spare_parts, 3),
-            (RepairRequest.last_status == RepairRequestStatus.finished, 4),
+            (RepairRequest.last_status == RepairRequestStatus.waiting_engineer, 2),
+            (RepairRequest.last_status == RepairRequestStatus.in_progress, 3),
+            (RepairRequest.last_status == RepairRequestStatus.waiting_spare_parts, 4),
+            (RepairRequest.last_status == RepairRequestStatus.finished, 5),
         )
 
         stmt = stmt.order_by(status_order.desc() if sorting.sort_order == SortOrder.descending else status_order.asc())
