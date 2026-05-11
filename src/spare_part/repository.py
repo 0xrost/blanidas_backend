@@ -56,7 +56,7 @@ class SparePartRepository(CRUDRepository[SparePart]):
         institutions = (await database.execute(select(Institution).where(Institution.is_default))).scalars().all()
         for institution in institutions:
             location_db = Location(
-                quantity=0,
+                new_quantity=0,
                 restored_quantity=0,
                 spare_part_id=row_id,
                 institution_id=institution.id,

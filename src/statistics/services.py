@@ -118,7 +118,7 @@ class StatisticsServices:
     @staticmethod
     async def get_used_spare_parts(database: AsyncSession, data: StatisticsFilters, limit: int) -> list[CategoricalChartDataItem]:
         query = (
-            select(SparePart.name, func.sum(UsedSparePart.quantity).label("count"))
+            select(SparePart.name, func.sum(UsedSparePart.new_quantity + UsedSparePart.restored_quantity).label("count"))
             .select_from(SparePart)
             .join(UsedSparePart, UsedSparePart.spare_part_id == SparePart.id)
             .join(RepairRequest, UsedSparePart.repair_request_id == RepairRequest.id)
@@ -334,11 +334,22 @@ class StatisticsServices:
                 SparePartCategory.name,
 
                 SparePart.total_quantity,
+                func.coalesce(func.sum(Location.new_quantity), 0),
+                func.coalesce(func.sum(Location.restored_quantity), 0),
                 SparePart.min_quantity,
-                SparePart.stock_status
+                SparePart.stock_status,
             )
             .select_from(SparePart)
+            .join(Location, Location.spare_part_id == SparePart.id, isouter=True)
             .join(SparePartCategory, SparePartCategory.id == SparePart.spare_part_category_id, isouter=True)
+            .group_by(
+                SparePart.id,
+                SparePart.name,
+                SparePartCategory.name,
+                SparePart.total_quantity,
+                SparePart.min_quantity,
+                SparePart.stock_status,
+            )
             .order_by(SparePart.name)
         )
 
@@ -355,8 +366,10 @@ class StatisticsServices:
             "Назва запчастини": item[1],
             "Категорія": item[2],
             "Загальна кількість": item[3],
-            "Мінімальна кількість": item[4],
-            "Статус складу": stock_status_map.get(item[5], "Невідомо"),
+            "Кількість нових": item[4],
+            "Кількість відновлених": item[5],
+            "Мінімальна кількість": item[6],
+            "Статус складу": stock_status_map.get(item[7], "Невідомо"),
         } for item in items.all()]
 
     @staticmethod
@@ -364,20 +377,20 @@ class StatisticsServices:
         query = (
             select(
                 SparePart.name,
-                Location.quantity,
+                Location.new_quantity,
                 Location.restored_quantity,
                 Institution.name,
             )
             .join(Location, Location.spare_part_id == SparePart.id)
             .join(Institution, Institution.id == Location.institution_id)
-            .order_by(SparePart.name, Location.quantity.desc())
+            .order_by(SparePart.name, (Location.new_quantity + Location.restored_quantity).desc())
         )
 
         items = await database.execute(query)
         return [{
             "Запчастина": item[0],
             "Заклад": item[3],
-            "Кількість нових": item[1] - item[2],
+            "Кількість нових": item[1],
             "Кількість відновлених": item[2],
         } for item in items.all()]
 
