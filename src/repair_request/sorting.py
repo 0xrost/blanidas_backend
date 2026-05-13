@@ -8,13 +8,11 @@ from src.repair_request.schemas import RepairRequest, RepairRequestStatus, Urgen
 
 
 def apply_repair_request_sorting(stmt: Select, sorting: Sorting, related_fields: SortingRelatedFieldsMap) -> Select:
-    if sorting.sort_by == "created_at":
+    if sorting.sort_by == "date":
         created_at_ordering = RepairRequest.created_at.desc() if sorting.sort_order == SortOrder.descending else RepairRequest.created_at.asc()
-        stmt = stmt.order_by(created_at_ordering)
-
-    if sorting.sort_by == "updated_at":
         updated_at_ordering = nulls_last(RepairRequest.updated_at.desc() if sorting.sort_order == SortOrder.descending else RepairRequest.updated_at.asc())
-        stmt = stmt.order_by(updated_at_ordering)
+
+        stmt = stmt.order_by(updated_at_ordering, created_at_ordering)
 
     if sorting.sort_by == "equipment_model_name":
         equipment_alias = aliased(Equipment)
