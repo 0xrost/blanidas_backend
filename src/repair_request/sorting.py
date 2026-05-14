@@ -9,10 +9,10 @@ from src.repair_request.schemas import RepairRequest, RepairRequestStatus, Urgen
 
 def apply_repair_request_sorting(stmt: Select, sorting: Sorting, related_fields: SortingRelatedFieldsMap) -> Select:
     if sorting.sort_by == "date":
-        created_at_ordering = RepairRequest.created_at.desc() if sorting.sort_order == SortOrder.descending else RepairRequest.created_at.asc()
-        updated_at_ordering = nulls_last(RepairRequest.updated_at.desc() if sorting.sort_order == SortOrder.descending else RepairRequest.updated_at.asc())
+        greatest_date = func.greatest(RepairRequest.created_at, func.coalesce(RepairRequest.updated_at, RepairRequest.created_at))
 
-        stmt = stmt.order_by(updated_at_ordering, created_at_ordering)
+        date_ordering = (greatest_date.desc() if sorting.sort_order == SortOrder.descending else greatest_date.asc())
+        stmt = stmt.order_by(date_ordering)
 
     if sorting.sort_by == "equipment_model_name":
         equipment_alias = aliased(Equipment)
